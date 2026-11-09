@@ -905,6 +905,7 @@ const DockedDash = GObject.registerClass({
     }
 
     _animateIn(time, delay) {
+        this.dash.setMagnificationVisible(true);
         if (this.dockState === State.SHOWN)
             return;
 
@@ -939,6 +940,7 @@ const DockedDash = GObject.registerClass({
     }
 
     _animateOut(time, delay) {
+        this.dash.setMagnificationVisible(false);
         if (this.dockState === State.HIDDEN)
             return;
 
