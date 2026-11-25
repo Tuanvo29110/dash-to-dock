@@ -420,6 +420,13 @@ const DockedDash = GObject.registerClass({
         this._slider.set_child(this._box);
         this._box.add_child(this.dash);
 
+        // Magnified icons are drawn outside the sliding container, so they
+        // are only allowed while the dock is completely shown.
+        const syncMagnification = () =>
+            this.dash.setMagnificationVisible(this._slider.slideX === 1);
+        this._slider.connect('notify::slide-x', syncMagnification);
+        syncMagnification();
+
         // Delay operations that require the shell to be fully loaded and with
         // user theme applied.
         if (Main.layoutManager._startingUp) {
@@ -905,7 +912,6 @@ const DockedDash = GObject.registerClass({
     }
 
     _animateIn(time, delay) {
-        this.dash.setMagnificationVisible(true);
         if (this.dockState === State.SHOWN)
             return;
 
@@ -940,7 +946,6 @@ const DockedDash = GObject.registerClass({
     }
 
     _animateOut(time, delay) {
-        this.dash.setMagnificationVisible(false);
         if (this.dockState === State.HIDDEN)
             return;
 

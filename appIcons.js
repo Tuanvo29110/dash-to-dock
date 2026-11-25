@@ -824,6 +824,7 @@ export const DockAbstractAppIcon = GObject.registerClass({
         this._numberOverlayLabel.add_style_class_name('number-overlay');
         this._numberOverlayOrder = -1;
         this._numberOverlayBin.hide();
+        this._numberOverlayBin._dtdIconDecoration = true;
 
         this._iconContainer.add_child(this._numberOverlayBin);
     }
@@ -1616,14 +1617,41 @@ export function itemShowLabel() {
     this.label.opacity = 0;
     this.label.show();
 
-    const [stageX, stageY] = this.get_transformed_position();
-    const node = this.label.get_theme_node();
+    positionItemLabel(this);
 
-    const itemWidth  = this.allocation.x2 - this.allocation.x1;
-    const itemHeight = this.allocation.y2 - this.allocation.y1;
+    this.label.remove_all_transitions();
+    this.label.ease({
+        opacity: 255,
+        duration: DASH_ITEM_LABEL_SHOW_TIME,
+        mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+    });
+    /* eslint-enable no-invalid-this */
+}
 
-    const labelWidth = this.label.get_width();
-    const labelHeight = this.label.get_height();
+/**
+ * Places the label of a dash item next to it, or next to its magnified icon
+ *
+ * @param item
+ */
+export function positionItemLabel(item) {
+    let [stageX, stageY] = item.get_transformed_position();
+    let itemWidth = item.allocation.x2 - item.allocation.x1;
+    let itemHeight = item.allocation.y2 - item.allocation.y1;
+
+    const magnified = item._dtdMagnifiedRect;
+    if (magnified) {
+        const right = Math.max(stageX + itemWidth, magnified.x + magnified.width);
+        const bottom = Math.max(stageY + itemHeight, magnified.y + magnified.height);
+        stageX = Math.min(stageX, magnified.x);
+        stageY = Math.min(stageY, magnified.y);
+        itemWidth = right - stageX;
+        itemHeight = bottom - stageY;
+    }
+
+    const node = item.label.get_theme_node();
+
+    const labelWidth = item.label.get_width();
+    const labelHeight = item.label.get_height();
 
     let x, y, xOffset, yOffset;
 
@@ -1635,7 +1663,7 @@ export function itemShowLabel() {
         yOffset = Math.floor((itemHeight - labelHeight) / 2);
         y = stageY + yOffset;
         xOffset = labelOffset;
-        x = stageX + this.get_width() + xOffset;
+        x = stageX + itemWidth + xOffset;
         break;
     case St.Side.RIGHT:
         yOffset = Math.floor((itemHeight - labelHeight) / 2);
@@ -1661,18 +1689,11 @@ export function itemShowLabel() {
 
     // Leave a few pixel gap
     const gap = 5;
-    const monitor = Main.layoutManager.findMonitorForActor(this);
+    const monitor = Main.layoutManager.findMonitorForActor(item);
     if (x - monitor.x < gap)
         x += monitor.x - x + labelOffset;
     else if (x + labelWidth > monitor.x + monitor.width - gap)
         x -= x + labelWidth - (monitor.x + monitor.width) + gap;
 
-    this.label.remove_all_transitions();
-    this.label.set_position(x, y);
-    this.label.ease({
-        opacity: 255,
-        duration: DASH_ITEM_LABEL_SHOW_TIME,
-        mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-    });
-    /* eslint-enable no-invalid-this */
+    item.label.set_position(Math.round(x), Math.round(y));
 }

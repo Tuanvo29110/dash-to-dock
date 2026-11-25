@@ -890,6 +890,7 @@ export class UnityIndicator extends IndicatorBase {
         this._notificationBadgeBin.child.clutterText.ellipsize =
             Pango.EllipsizeMode.MIDDLE;
 
+        this._notificationBadgeBin._dtdIconDecoration = true;
         this._source._iconContainer.add_child(this._notificationBadgeBin);
         this._updateNotificationBadgeStyle();
 
@@ -959,6 +960,7 @@ export class UnityIndicator extends IndicatorBase {
             this._drawProgressOverlay(this._progressOverlayArea);
         });
 
+        this._progressOverlayArea._dtdIconDecoration = true;
         this._source._iconContainer.add_child(this._progressOverlayArea);
         this._updateProgressOverlay();
     }

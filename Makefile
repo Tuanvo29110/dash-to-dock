@@ -23,6 +23,7 @@ EXTRA_MODULES = \
                 notificationsMonitor.js \
                 windowPreview.js \
                 intellihide.js \
+                magnification.js \
                 prefs.js \
                 theming.js \
                 utils.js \
